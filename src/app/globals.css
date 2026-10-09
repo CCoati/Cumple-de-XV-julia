@@ -1,26 +1,139 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ─── Tailwind v4 Theme Tokens ─── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Color palette - inspired by the invitation */
+  --color-ivory: #FAF8F5;
+  --color-ivory-50: #F7F4F0;
+  --color-ivory-100: #F0ECE6;
+  --color-sage-50: #F2F5EF;
+  --color-sage-100: #E5EBE0;
+  --color-sage-200: #CBDABB;
+  --color-sage-300: #B1C49C;
+  --color-sage-400: #A3B18A;
+  --color-sage-500: #8B9D7D;
+  --color-sage-600: #7A8B6F;
+  --color-sage-700: #5C6B4F;
+  --color-forest: #3D4A35;
+
+  /* Typography */
+  --font-serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-script: "Great Vibes", cursive;
 }
 
-@media (prefers-color-scheme: dark) {
+/* ─── Global Styles ─── */
+:root {
+  scroll-behavior: smooth;
+  font-size: 17px;
+}
+
+@media (min-width: 640px) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    font-size: 18px;
+  }
+}
+
+/* Hide Netlify drawer / badge / feedback / floating widgets */
+#netlify-drawer,
+[data-netlify-drawer],
+[id^="netlify"],
+[id*="netlify"],
+[class*="netlify"],
+[data-testid*="netlify"],
+iframe[src*="netlify"],
+iframe[title*="Netlify"],
+a[href*="netlify.com"],
+div:has(> a[href*="netlify.com"]),
+.netlify-badge,
+netlify-drawer,
+#feedback-widget-button,
+[aria-label*="Netlify"],
+[aria-label*="netlify"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  z-index: -9999 !important;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #FAF8F5;
+  color: #3D4A35;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Elegant selection */
+::selection {
+  background-color: rgba(163, 177, 138, 0.25);
+  color: #3D4A35;
+}
+
+::-moz-selection {
+  background-color: rgba(163, 177, 138, 0.25);
+  color: #3D4A35;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF8F5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(163, 177, 138, 0.4);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(122, 139, 111, 0.5);
+}
+
+/* Smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid rgba(163, 177, 138, 0.5);
+  outline-offset: 2px;
+}
+
+/* Input autofill styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px rgba(250, 248, 245, 0.9) inset;
+  -webkit-text-fill-color: #3D4A35;
+  caret-color: #3D4A35;
+  font-family: "Cormorant Garamond", Georgia, serif;
+}
+
+/* Tabular numbers for countdown */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }

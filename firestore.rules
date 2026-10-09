@@ -1,0 +1,86 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // =========================================================================
+    // 1. POLÍTICA DE AUTORIZACIÓN ESTRICTA PARA ADMINISTRADORES
+    // =========================================================================
+    // Un administrador debe estar autenticado por Firebase Auth y su UID debe
+    // existir en la colección protegida /admins/{uid} con role: 'admin'.
+    // No se utilizan contraseñas, emails ni proveedores como criterio de autorización.
+    function isAuthorizedAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // =========================================================================
+    // 2. COLECCIÓN PROTEGIDA DE ROLES DE ADMINISTRACIÓN (/admins)
+    // =========================================================================
+    match /admins/{adminId} {
+      // El usuario solo puede leer su propio documento para verificar su estado
+      allow read: if request.auth != null && request.auth.uid == adminId;
+      // BLOQUEO TOTAL DE ESCRITURA: Ningún cliente web puede crear/editar administradores.
+      // La creación de administradores se realiza exclusivamente desde Firebase Console o Admin SDK.
+      allow write: if false;
+    }
+
+    // =========================================================================
+    // 3. COLECCIÓN DE CONFIRMACIONES DE ASISTENCIA (/confirmaciones)
+    // =========================================================================
+    function isValidConfirmationCreate() {
+      let data = request.resource.data;
+      return 
+        // A. Integridad de campos: Solo se permiten las 7 claves del modelo oficial
+        data.keys().hasOnly([
+          'fullName', 'phone', 'attending', 'guestCount', 'guestNames', 'message', 'createdAt'
+        ])
+        // B. Validación de Nombre completo (2 a 100 caracteres)
+        && data.fullName is string
+        && data.fullName.size() >= 2
+        && data.fullName.size() <= 100
+        // C. Validación de Teléfono / WhatsApp (6 a 30 caracteres)
+        && data.phone is string
+        && data.phone.size() >= 6
+        && data.phone.size() <= 30
+        // D. Observaciones o Mensaje (máximo 500 caracteres)
+        && data.message is string
+        && data.message.size() <= 500
+        // E. Marca temporal obligatoria del servidor
+        && data.createdAt == request.time
+        // F. Consistencia estricta de Asistencia y Acompañantes:
+        && (
+          // Caso 1: Asiste -> guestCount entre 0 y 10, y guestNames.size() coincide exactamente
+          (data.attending == 'yes'
+            && data.guestCount is int
+            && data.guestCount >= 0
+            && data.guestCount <= 10
+            && data.guestNames is list
+            && data.guestNames.size() == data.guestCount)
+          ||
+          // Caso 2: No asiste -> guestCount DEBE ser 0 y guestNames DEBE estar vacío
+          (data.attending == 'no'
+            && data.guestCount == 0
+            && data.guestNames is list
+            && data.guestNames.size() == 0)
+        );
+    }
+
+    match /confirmaciones/{confirmationId} {
+      // Los visitantes anónimos o invitados SOLO pueden CREAR con esquema validado
+      allow create: if isValidConfirmationCreate();
+
+      // PROTECCIÓN DE PRIVACIDAD: Visitantes no pueden listar ni leer confirmaciones.
+      // Lectura, modificación y eliminación exclusivas para administradores autorizados.
+      allow read, update, delete: if isAuthorizedAdmin();
+    }
+
+    // =========================================================================
+    // 4. BLOQUEO GENERAL POR DEFECTO (PRINCIPIO DE MÍNIMO PRIVILEGIO)
+    // =========================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

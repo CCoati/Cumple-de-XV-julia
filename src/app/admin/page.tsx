@@ -2,9 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import type { User } from 'firebase/auth';
-import { onAdminAuthStateChanged, checkAdminRole, signOutAdmin } from '@/lib/firebase/auth';
-import { isFirebaseConfigured } from '@/lib/firebase/config';
+import type { User } from '@supabase/supabase-js';
+import {
+  onAdminAuthStateChanged,
+  checkAdminRole,
+  signOutAdmin,
+  isSupabaseConfigured,
+} from '@/lib/supabase';
 import dynamic from 'next/dynamic';
 import AdminLogin from '@/components/admin/AdminLogin';
 
@@ -26,14 +30,13 @@ const AdminDashboard = dynamic(() => import('@/components/admin/AdminDashboard')
 export default function AdminPage() {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [checkingAuth, setCheckingAuth] = useState(isFirebaseConfigured);
+  const [checkingAuth, setCheckingAuth] = useState(isSupabaseConfigured);
   const [checkingRole, setCheckingRole] = useState(false);
-  const [copiedUid, setCopiedUid] = useState(false);
 
   const verifyUserRole = useCallback(async (currentUser: User) => {
     setCheckingRole(true);
     try {
-      const authorized = await checkAdminRole(currentUser.uid);
+      const authorized = await checkAdminRole(currentUser);
       setIsAdmin(authorized);
     } catch {
       setIsAdmin(false);
@@ -43,7 +46,8 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
+    if (!isSupabaseConfigured) {
+      setCheckingAuth(false);
       return;
     }
 
@@ -61,12 +65,6 @@ export default function AdminPage() {
 
     return () => unsubscribe();
   }, [verifyUserRole]);
-
-  const handleCopyUid = (uid: string) => {
-    navigator.clipboard.writeText(uid);
-    setCopiedUid(true);
-    setTimeout(() => setCopiedUid(false), 2500);
-  };
 
   const handleLogout = async () => {
     try {
@@ -93,22 +91,26 @@ export default function AdminPage() {
     );
   }
 
-  // 2. Si Firebase no está configurado en las variables de entorno
-  if (!isFirebaseConfigured) {
+  // 2. Si Supabase no está configurado en las variables de entorno
+  if (!isSupabaseConfigured) {
     return (
       <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto">
         <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mb-4 text-xl font-bold">
           !
         </div>
         <h2 className="font-serif text-2xl text-forest font-medium mb-2">
-          Firebase no configurado
+          Supabase no configurado
         </h2>
         <p className="font-serif text-sm text-sage-700 leading-relaxed mb-6">
           Para habilitar el panel de administración, es necesario configurar las variables de entorno{' '}
           <code className="bg-sage-100 text-forest px-1.5 py-0.5 rounded text-xs font-mono">
-            NEXT_PUBLIC_FIREBASE_*
+            NEXT_PUBLIC_SUPABASE_URL
           </code>{' '}
-          en tu archivo <code className="font-mono text-xs">.env.local</code> o en Netlify.
+          y{' '}
+          <code className="bg-sage-100 text-forest px-1.5 py-0.5 rounded text-xs font-mono">
+            NEXT_PUBLIC_SUPABASE_ANON_KEY
+          </code>{' '}
+          en tu archivo <code className="font-mono text-xs">.env.local</code> o en tu servidor de despliegue.
         </p>
         <Link
           href="/"
@@ -125,14 +127,13 @@ export default function AdminPage() {
     return (
       <AdminLogin
         onLoginSuccess={() => {
-          // El listener onAdminAuthStateChanged se encargará de verificar el rol
+          // El listener onAdminAuthStateChanged se encargará de actualizar el estado
         }}
       />
     );
   }
 
-  // 4. Usuario autenticado pero SIN rol de administrador en Firestore: PANTALLA DE ACCESO DENEGADO
-  // NO se ejecuta ninguna consulta a 'confirmaciones' ni se cargan datos privados
+  // 4. Usuario autenticado pero sin rol de administrador (si se define rol restringido)
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -157,33 +158,9 @@ export default function AdminPage() {
           </h2>
 
           <p className="font-serif text-xs text-sage-600 leading-relaxed mb-5">
-            Tu cuenta (<strong className="text-forest font-medium">{user.email}</strong>) ha iniciado
-            sesión correctamente, pero <span className="underline decoration-rose-400">no posee permisos de administrador</span> en Cloud Firestore.
+            Tu cuenta (<strong className="text-forest font-medium">{user.email}</strong>) no posee permisos de administrador en Supabase.
           </p>
 
-          {/* Caja con el UID para copiar y configurar en Firebase */}
-          <div className="bg-[#FAF8F5] border border-sage-200 rounded p-3 text-left mb-5">
-            <p className="text-[11px] font-serif text-sage-600 uppercase tracking-wider mb-1 font-medium">
-              Tu Identificador UID en Firebase:
-            </p>
-            <div className="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded border border-sage-300">
-              <code className="text-[11px] text-forest font-mono break-all select-all">
-                {user.uid}
-              </code>
-              <button
-                type="button"
-                onClick={() => handleCopyUid(user.uid)}
-                className="px-2 py-1 text-[11px] font-serif text-sage-700 hover:text-forest bg-sage-50 border border-sage-200 rounded whitespace-nowrap transition-colors"
-              >
-                {copiedUid ? '¡Copiado!' : 'Copiar'}
-              </button>
-            </div>
-            <p className="text-[10px] font-serif text-sage-500 mt-2 leading-relaxed">
-              Para habilitar esta cuenta, se debe crear el documento con este UID exacto dentro de la colección <code className="font-mono text-[10px]">admins</code> con el campo <code className="font-mono text-[10px]">role: &quot;admin&quot;</code> en Firebase Console.
-            </p>
-          </div>
-
-          {/* Botones de acción */}
           <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
             <button
               type="button"
@@ -214,7 +191,7 @@ export default function AdminPage() {
     );
   }
 
-  // 5. Usuario autenticado Y verificado con rol de administrador en Firestore: RENDERIZAR DASHBOARD
+  // 5. Usuario autenticado Y verificado con rol de administrador: RENDERIZAR DASHBOARD
   return (
     <AdminDashboard
       user={user}

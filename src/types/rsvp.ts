@@ -20,6 +20,6 @@ export interface RSVPDocument extends RSVPFormData {
     toDate?: () => Date;
     seconds?: number;
     nanoseconds?: number;
-  } | null;
+  } | string | Date | null;
   source?: string;
 }

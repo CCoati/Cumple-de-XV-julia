@@ -69,33 +69,23 @@ export default function Hero() {
       {/* Top spacing spacer */}
       <div className="w-full h-1 sm:h-2" />
 
-      {/* Main Content Card matching the original composition */}
-      <div className="relative z-10 text-center px-4 py-2 sm:py-4 max-w-lg mx-auto flex flex-col items-center justify-center my-auto">
-        {/* "SAVE THE DATE" Header */}
+      {/* Main Content Card with elegant balanced vertical spacing */}
+      <div className="relative z-10 text-center px-4 py-3 sm:py-6 max-w-md mx-auto flex flex-col items-center justify-center my-auto">
+        {/* Centerpiece: XV + Juli + Flanking Watercolor Sprigs */}
         <motion.div
-          className="mb-2 sm:mb-3"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration, delay: 0.3 }}
+          className="relative my-2 sm:my-3 w-full flex items-center justify-center"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: duration * 1.2, delay: 0.3, ease: 'easeOut' }}
         >
-          <p className="font-serif text-forest text-2xl sm:text-3xl md:text-4xl tracking-[0.32em] uppercase font-light leading-none mb-1.5 sm:mb-2">
-            SAVE
-          </p>
-          <div className="flex items-center justify-center gap-2.5 my-1">
-            <div className="w-6 sm:w-10 h-px bg-sage-400/60" />
-            <p className="font-serif text-sage-600 text-xs sm:text-sm tracking-[0.3em] uppercase font-medium">
-              THE
-            </p>
-            <div className="w-6 sm:w-10 h-px bg-sage-400/60" />
+          <div className="w-60 sm:w-72 md:w-80 max-w-[85vw] mx-auto py-1">
+            <BotanicalWatercolor variant="centerpiece" opacity={0.98} />
           </div>
-          <p className="font-serif text-forest text-2xl sm:text-3xl md:text-4xl tracking-[0.32em] uppercase font-light leading-none mt-1.5 sm:mb-0">
-            DATE
-          </p>
         </motion.div>
 
         {/* Divider with heart */}
         <motion.div
-          className="flex items-center justify-center gap-3 w-40 sm:w-56 my-1.5 sm:my-2.5"
+          className="flex items-center justify-center gap-3 w-44 sm:w-60 my-2 sm:my-3"
           initial={{ opacity: 0, scaleX: 0 }}
           animate={{ opacity: 1, scaleX: 1 }}
           transition={{ duration, delay: 0.5 }}
@@ -105,36 +95,12 @@ export default function Hero() {
           <div className="flex-1 h-px bg-sage-300/60" />
         </motion.div>
 
-        {/* Centerpiece: XV + Juli + Flanking Watercolor Sprigs */}
-        <motion.div
-          className="relative my-1 sm:my-2 w-full flex items-center justify-center"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: duration * 1.2, delay: 0.7, ease: 'easeOut' }}
-        >
-          <div className="w-52 sm:w-64 md:w-72 max-w-[80vw] mx-auto py-1">
-            <BotanicalWatercolor variant="centerpiece" opacity={0.98} />
-          </div>
-        </motion.div>
-
-        {/* Divider with heart */}
-        <motion.div
-          className="flex items-center justify-center gap-3 w-40 sm:w-56 my-1.5 sm:my-2.5"
-          initial={{ opacity: 0, scaleX: 0 }}
-          animate={{ opacity: 1, scaleX: 1 }}
-          transition={{ duration, delay: 0.9 }}
-        >
-          <div className="flex-1 h-px bg-sage-300/60" />
-          <span className="text-sage-500 text-xs">♥</span>
-          <div className="flex-1 h-px bg-sage-300/60" />
-        </motion.div>
-
         {/* Date in tracked clean style */}
         <motion.p
-          className="font-serif text-sage-700 text-xs sm:text-sm md:text-base tracking-[0.28em] uppercase mb-1.5 sm:mb-2 font-medium"
+          className="font-serif text-sage-800 text-sm sm:text-base md:text-lg tracking-[0.3em] uppercase mb-1.5 sm:mb-2 font-medium"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration, delay: 1.1 }}
+          transition={{ duration, delay: 0.7 }}
         >
           28 DE NOVIEMBRE, 2026
         </motion.p>
@@ -144,17 +110,17 @@ export default function Hero() {
           className="text-sage-400 text-xs mb-2 sm:mb-2.5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration, delay: 1.2 }}
+          transition={{ duration, delay: 0.8 }}
         >
           ♥
         </motion.div>
 
         {/* Bottom invitation quote */}
         <motion.p
-          className="font-serif text-sage-600 text-xs sm:text-sm tracking-[0.16em] uppercase max-w-xs sm:max-w-md mx-auto leading-relaxed"
+          className="font-serif text-sage-600 text-xs sm:text-sm tracking-[0.18em] uppercase max-w-xs sm:max-w-md mx-auto leading-relaxed"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration, delay: 1.3 }}
+          transition={{ duration, delay: 0.9 }}
         >
           Los momentos más lindos son los que compartimos
         </motion.p>

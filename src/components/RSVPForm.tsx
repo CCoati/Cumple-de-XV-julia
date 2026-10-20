@@ -5,7 +5,7 @@ import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import type { RSVPFormData, RSVPFormStatus } from '@/types/rsvp';
 import BotanicalWatercolor from '@/components/decorative/BotanicalWatercolor';
 import HeartDivider from '@/components/decorative/HeartDivider';
-import { saveRSVPToFirestore, isFirebaseConfigured } from '@/lib/firebase';
+import { saveRSVPToSupabase, isSupabaseConfigured } from '@/lib/supabase';
 
 const initialFormData: RSVPFormData = {
   fullName: '',
@@ -118,17 +118,17 @@ export default function RSVPForm() {
     setErrorMessage('');
 
     try {
-      let savedToFirestore = false;
+      let savedToSupabase = false;
 
-      // 1. Guardar en Cloud Firestore (colección 'confirmaciones')
-      if (isFirebaseConfigured) {
-        const firestoreResult = await saveRSVPToFirestore(formData);
-        if (firestoreResult.success) {
-          savedToFirestore = true;
+      // 1. Guardar en Supabase (tabla 'confirmaciones')
+      if (isSupabaseConfigured) {
+        const supabaseResult = await saveRSVPToSupabase(formData);
+        if (supabaseResult.success) {
+          savedToSupabase = true;
         } else {
-          console.error('Error guardando en Firestore:', firestoreResult.error);
+          console.error('Error guardando en Supabase:', supabaseResult.error);
           throw new Error(
-            firestoreResult.error || 'No se pudo guardar la confirmación en la base de datos.'
+            supabaseResult.error || 'No se pudo guardar la confirmación en la base de datos.'
           );
         }
       }
@@ -164,7 +164,7 @@ export default function RSVPForm() {
         // Ignorar falla de red secundaria hacia formsubmit
       }
 
-      if (!emailNotificationSent && !savedToFirestore) {
+      if (!emailNotificationSent && !savedToSupabase) {
         try {
           const fallbackRes = await fetch('/api/rsvp', {
             method: 'POST',
@@ -177,8 +177,8 @@ export default function RSVPForm() {
         }
       }
 
-      // Confirmación exitosa si se guardó en Firestore o en respaldo
-      if (savedToFirestore || emailNotificationSent || !isFirebaseConfigured) {
+      // Confirmación exitosa si se guardó en Supabase o en respaldo
+      if (savedToSupabase || emailNotificationSent || !isSupabaseConfigured) {
         setStatus('success');
       } else {
         throw new Error('No se pudo registrar la confirmación en el servidor.');

@@ -2,15 +2,15 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import type { User } from 'firebase/auth';
+import type { User } from '@supabase/supabase-js';
 import type { RSVPDocument, RSVPFormData } from '@/types/rsvp';
 import {
   getConfirmations,
   updateConfirmation,
   deleteConfirmation,
   subscribeToConfirmations,
-} from '@/lib/firebase/rsvp';
-import { signOutAdmin } from '@/lib/firebase/auth';
+} from '@/lib/supabase/rsvp';
+import { signOutAdmin } from '@/lib/supabase/auth';
 import ConfirmationDetailModal from './ConfirmationDetailModal';
 import ConfirmationEditModal from './ConfirmationEditModal';
 import ConfirmationDeleteModal from './ConfirmationDeleteModal';
@@ -50,16 +50,10 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
       setConfirmations(data);
     } catch (err: unknown) {
       console.error('Error actualizando confirmaciones:', err);
-      const fireErr = err as { code?: string };
-      if (fireErr.code === 'permission-denied') {
-        setErrorMessage(
-          `Acceso denegado (403): Tu cuenta (${user.email}) no tiene autorización de administrador en Firestore. Para acceder, creá en Firebase Console el documento /admins/${user.uid} con el campo role: "admin".`
-        );
-      } else {
-        setErrorMessage(
-          'No se pudieron cargar las confirmaciones. Verificá tu conexión y permisos en Firebase.'
-        );
-      }
+      const authErr = err as { message?: string };
+      setErrorMessage(
+        authErr.message || 'No se pudieron cargar las confirmaciones. Verificá tu conexión y permisos en Supabase.'
+      );
     } finally {
       setRefreshing(false);
     }
@@ -79,16 +73,10 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
         .catch((err: unknown) => {
           if (isMounted) {
             console.error('Error cargando confirmaciones:', err);
-            const fireErr = err as { code?: string };
-            if (fireErr.code === 'permission-denied') {
-              setErrorMessage(
-                `Acceso denegado (403): Tu cuenta (${user.email}) no tiene autorización de administrador en Firestore. Para acceder, creá en Firebase Console el documento /admins/${user.uid} con el campo role: "admin".`
-              );
-            } else {
-              setErrorMessage(
-                'No se pudieron cargar las confirmaciones. Verificá tu conexión y permisos en Firebase.'
-              );
-            }
+            const authErr = err as { message?: string };
+            setErrorMessage(
+              authErr.message || 'No se pudieron cargar las confirmaciones. Verificá tu conexión y permisos en Supabase.'
+            );
             setLoading(false);
           }
         });
@@ -119,7 +107,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
       isMounted = false;
       unsubscribe();
     };
-  }, [realtimeMode, user.email, user.uid]);
+  }, [realtimeMode, user.email, user.id]);
 
   const showFeedback = (msg: string) => {
     setFeedbackMessage(msg);
@@ -201,17 +189,27 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
       );
     }
 
+    const getTime = (val: unknown): number => {
+      if (!val) return 0;
+      if (
+        typeof val === 'object' &&
+        val !== null &&
+        'toDate' in val &&
+        typeof (val as { toDate?: () => Date }).toDate === 'function'
+      ) {
+        return (val as { toDate: () => Date }).toDate().getTime();
+      }
+      const parsed = new Date(val as string | number | Date).getTime();
+      return isNaN(parsed) ? 0 : parsed;
+    };
+
     // Ordenamiento
     result.sort((a, b) => {
       if (sortBy === 'date-desc') {
-        const timeA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
-        const timeB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
-        return timeB - timeA;
+        return getTime(b.createdAt) - getTime(a.createdAt);
       }
       if (sortBy === 'date-asc') {
-        const timeA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
-        const timeB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
-        return timeA - timeB;
+        return getTime(a.createdAt) - getTime(b.createdAt);
       }
       if (sortBy === 'name-asc') {
         return a.fullName.localeCompare(b.fullName);

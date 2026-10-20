@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { signInAdmin, resetAdminPassword } from '@/lib/firebase/auth';
+import { signInAdmin, resetAdminPassword } from '@/lib/supabase/auth';
 
 interface AdminLoginProps {
   onLoginSuccess: () => void;
@@ -38,19 +38,18 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
       onLoginSuccess();
     } catch (error: unknown) {
       console.error('Error al iniciar sesión:', error);
-      const authError = error as { code?: string };
-      if (
-        authError.code === 'auth/invalid-credential' ||
-        authError.code === 'auth/wrong-password' ||
-        authError.code === 'auth/user-not-found'
-      ) {
+      const authError = error as { message?: string; status?: number };
+      const msg = authError.message || '';
+      if (msg.toLowerCase().includes('invalid login credentials')) {
         setErrorMessage('Correo o contraseña incorrectos.');
-      } else if (authError.code === 'auth/too-many-requests') {
+      } else if (msg.toLowerCase().includes('email not confirmed')) {
+        setErrorMessage('El correo aún no ha sido confirmado en Supabase.');
+      } else if (msg.toLowerCase().includes('too many requests')) {
         setErrorMessage('Demasiados intentos fallidos. Por favor aguardá unos minutos.');
-      } else if (authError.code === 'auth/network-request-failed') {
-        setErrorMessage('Error de conexión a internet. Verificá tu red.');
+      } else if (msg.toLowerCase().includes('network') || msg.toLowerCase().includes('fetch')) {
+        setErrorMessage('Error de conexión a internet o con Supabase. Verificá tu red.');
       } else {
-        setErrorMessage('Ocurrió un error al ingresar. Verificá tus credenciales.');
+        setErrorMessage(msg || 'Ocurrió un error al ingresar. Verificá tus credenciales.');
       }
     } finally {
       setLoading(false);
@@ -225,7 +224,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
             <p className="font-serif text-[11px] text-sage-500 leading-relaxed">
               Acceso restringido para administradores autorizados.
               <br />
-              Las cuentas se crean manualmente en Firebase Console.
+              Las cuentas se gestionan en Supabase Authentication.
             </p>
           </div>
         </div>
@@ -249,7 +248,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
               Restablecer Contraseña
             </h3>
             <p className="font-serif text-xs text-sage-600 mb-4 leading-relaxed">
-              Ingresá tu correo electrónico para recibir un enlace oficial de recuperación de Firebase.
+              Ingresá tu correo electrónico para recibir un enlace oficial de recuperación de Supabase.
             </p>
 
             <form onSubmit={handleResetPassword} className="space-y-4">

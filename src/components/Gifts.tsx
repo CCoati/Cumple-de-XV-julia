@@ -185,124 +185,92 @@ export default function Gifts() {
               </div>
 
               {/* Bank Details List */}
-              <div className="space-y-3.5 bg-white/70 border border-sage-200/50 rounded-sm p-4 sm:p-5">
-                {/* Bank Name */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-sage-100/60 gap-1 text-left">
-                  <span className="font-serif text-sage-500 text-xs uppercase tracking-[0.15em]">
-                    Banco
-                  </span>
-                  <span className="font-serif text-forest text-sm font-medium">
-                    {bankDetails.bank}
-                  </span>
-                </div>
-
+              <div className="space-y-4 bg-white/80 border border-sage-200/70 rounded-md p-4 sm:p-6 shadow-xs">
                 {/* Account Holder */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-sage-100/60 gap-1 text-left">
-                  <span className="font-serif text-sage-500 text-xs uppercase tracking-[0.15em]">
-                    Titular
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-sage-100 text-left gap-1">
+                  <span className="font-serif text-sage-600 text-xs uppercase tracking-[0.18em] font-medium">
+                    Titular de las cuentas
                   </span>
-                  <span className="font-serif text-forest text-sm font-medium">
+                  <span className="font-serif text-forest text-sm sm:text-base font-semibold">
                     {bankDetails.holder}
                   </span>
                 </div>
 
-                {/* Account Number with Copy */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-sage-100/60 gap-2 text-left">
+                {/* BROU Card */}
+                <div className="p-3.5 bg-[#FAF8F5] border border-sage-200/80 rounded flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
                   <div>
-                    <span className="font-serif text-sage-500 text-xs uppercase tracking-[0.15em] block">
-                      Cuenta Bancaria
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="inline-block w-2 h-2 rounded-full bg-forest" />
+                      <span className="font-serif text-forest text-xs uppercase tracking-[0.16em] font-semibold">
+                        {bankDetails.brou.bankName}
+                      </span>
+                    </div>
+                    <span className="font-serif text-sage-500 text-[11px] block mb-0.5">
+                      Número de cuenta:
                     </span>
-                    <span className="font-mono text-forest text-xs sm:text-sm select-all">
-                      {bankDetails.accountNumber}
+                    <span className="font-mono text-forest text-sm sm:text-base font-bold select-all tracking-wide">
+                      {bankDetails.brou.accountNumber}
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => copyToClipboard(bankDetails.accountNumber, 'accountNumber')}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-sage-50 border border-sage-300/40 rounded-sm font-serif text-xs text-forest tracking-wider uppercase transition-colors hover:bg-sage-100/80 active:scale-95"
+                    onClick={() => copyToClipboard(bankDetails.brou.accountNumber, 'brou')}
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white border border-sage-300 rounded font-serif text-xs text-forest tracking-wider uppercase transition-all hover:bg-sage-50 hover:border-forest/60 active:scale-95 shadow-2xs whitespace-nowrap"
                   >
-                    {copiedField === 'accountNumber' ? (
+                    {copiedField === 'brou' ? (
                       <>
-                        <svg className="w-3.5 h-3.5 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <svg className="w-3.5 h-3.5 text-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
-                        <span>¡Copiado!</span>
+                        <span className="font-semibold text-forest">¡Copiado!</span>
                       </>
                     ) : (
                       <>
-                        <svg className="w-3.5 h-3.5 text-sage-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                        <svg className="w-3.5 h-3.5 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
                           <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                         </svg>
-                        <span>Copiar</span>
+                        <span>Copiar BROU</span>
                       </>
                     )}
                   </button>
                 </div>
 
-                {/* Abitab with Copy */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-sage-100/60 gap-2 text-left">
+                {/* Prex Card */}
+                <div className="p-3.5 bg-[#FAF8F5] border border-sage-200/80 rounded flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
                   <div>
-                    <span className="font-serif text-sage-500 text-xs uppercase tracking-[0.15em] block">
-                      Abitab (Colectivo / Cuenta)
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="inline-block w-2 h-2 rounded-full bg-[#7A8B6F]" />
+                      <span className="font-serif text-forest text-xs uppercase tracking-[0.16em] font-semibold">
+                        {bankDetails.prex.provider}
+                      </span>
+                    </div>
+                    <span className="font-serif text-sage-500 text-[11px] block mb-0.5">
+                      Número de cuenta Prex:
                     </span>
-                    <span className="font-mono text-forest text-sm font-semibold select-all">
-                      {bankDetails.abitab}
+                    <span className="font-mono text-forest text-sm sm:text-base font-bold select-all tracking-wide">
+                      {bankDetails.prex.accountNumber}
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => copyToClipboard(bankDetails.abitab, 'abitab')}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-sage-50 border border-sage-300/40 rounded-sm font-serif text-xs text-forest tracking-wider uppercase transition-colors hover:bg-sage-100/80 active:scale-95"
+                    onClick={() => copyToClipboard(bankDetails.prex.accountNumber, 'prex')}
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white border border-sage-300 rounded font-serif text-xs text-forest tracking-wider uppercase transition-all hover:bg-sage-50 hover:border-forest/60 active:scale-95 shadow-2xs whitespace-nowrap"
                   >
-                    {copiedField === 'abitab' ? (
+                    {copiedField === 'prex' ? (
                       <>
-                        <svg className="w-3.5 h-3.5 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <svg className="w-3.5 h-3.5 text-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
-                        <span>¡Copiado!</span>
+                        <span className="font-semibold text-forest">¡Copiado!</span>
                       </>
                     ) : (
                       <>
-                        <svg className="w-3.5 h-3.5 text-sage-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                        <svg className="w-3.5 h-3.5 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
                           <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                         </svg>
-                        <span>Copiar</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {/* Redpagos with Copy */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-left">
-                  <div>
-                    <span className="font-serif text-sage-500 text-xs uppercase tracking-[0.15em] block">
-                      Redpagos (Colectivo / Cuenta)
-                    </span>
-                    <span className="font-mono text-forest text-sm font-semibold select-all">
-                      {bankDetails.redpagos}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(bankDetails.redpagos, 'redpagos')}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-sage-50 border border-sage-300/40 rounded-sm font-serif text-xs text-forest tracking-wider uppercase transition-colors hover:bg-sage-100/80 active:scale-95"
-                  >
-                    {copiedField === 'redpagos' ? (
-                      <>
-                        <svg className="w-3.5 h-3.5 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                        <span>¡Copiado!</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-3.5 h-3.5 text-sage-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                        <span>Copiar</span>
+                        <span>Copiar Prex</span>
                       </>
                     )}
                   </button>
@@ -310,7 +278,7 @@ export default function Gifts() {
               </div>
 
               {/* Note */}
-              <p className="mt-4 text-center font-serif text-sage-500 text-xs italic">
+              <p className="mt-4 text-center font-serif text-sage-600 text-xs italic">
                 {bankDetails.note}
               </p>
 

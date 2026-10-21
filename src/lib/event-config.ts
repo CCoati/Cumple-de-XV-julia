@@ -59,4 +59,10 @@ export const eventConfig = {
     'Los momentos más lindos son los que compartimos.',
     'Te esperamos para celebrar juntos.',
   ],
+  /** Música de fondo de la invitación */
+  music: {
+    title: "Say You Won't Let Go",
+    artist: 'James Arthur',
+    src: "/audio/James Arthur - Say You Won't Let Go.mp3",
+  },
 } as const;

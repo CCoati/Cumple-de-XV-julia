@@ -1,4 +1,5 @@
 import Hero from '@/components/Hero';
+import AudioPlayer from '@/components/AudioPlayer';
 import Introduction from '@/components/Introduction';
 import Countdown from '@/components/Countdown';
 import EventDetails from '@/components/EventDetails';
@@ -11,6 +12,7 @@ import SectionDivider from '@/components/decorative/SectionDivider';
 export default function Home() {
   return (
     <main className="overflow-x-hidden">
+      <AudioPlayer />
       <Hero />
 
       <SectionDivider variant="botanical" className="py-2" />

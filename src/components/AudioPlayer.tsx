@@ -1,82 +1,67 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { eventConfig } from '@/lib/event-config';
 
 export default function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const hasInteractedRef = useRef<boolean>(false);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    audio.volume = 0.4;
+    audio.volume = 0.45;
 
-    const handleCanPlay = () => {
-      setIsLoaded(true);
-    };
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-
-    audio.addEventListener('canplay', handleCanPlay);
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-
-    // Intentar reproducción automática
-    const attemptPlay = () => {
-      if (hasInteractedRef.current) return;
+    const playAudio = () => {
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             setIsPlaying(true);
-            hasInteractedRef.current = true;
           })
           .catch(() => {
-            // Autoplay bloqueado por políticas del navegador; se activará con la primera interacción
+            // Autoplay bloqueado inicialmente por política del navegador
             setIsPlaying(false);
           });
       }
     };
 
-    // Intento inmediato al cargar
-    attemptPlay();
+    // 1. Intentar reproducir de inmediato al cargar la página
+    playAudio();
 
-    // Eventos de primera interacción del usuario en la pantalla
-    const onUserInteraction = () => {
-      if (!hasInteractedRef.current && audio.paused) {
-        attemptPlay();
+    // 2. Respaldo para navegadores móviles con bloqueo de autoplay:
+    // Al primer contacto (scroll, tap o clic en cualquier parte), activar de inmediato
+    const handleFirstInteraction = () => {
+      if (audio.paused) {
+        audio.play()
+          .then(() => setIsPlaying(true))
+          .catch(() => {});
       }
-      removeListeners();
+      cleanup();
     };
 
-    const removeListeners = () => {
-      window.removeEventListener('click', onUserInteraction);
-      window.removeEventListener('touchstart', onUserInteraction);
-      window.removeEventListener('scroll', onUserInteraction);
+    const cleanup = () => {
+      window.removeEventListener('pointerdown', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+      window.removeEventListener('scroll', handleFirstInteraction);
+      window.removeEventListener('click', handleFirstInteraction);
     };
 
-    window.addEventListener('click', onUserInteraction, { once: true, passive: true });
-    window.addEventListener('touchstart', onUserInteraction, { once: true, passive: true });
-    window.addEventListener('scroll', onUserInteraction, { once: true, passive: true });
+    window.addEventListener('pointerdown', handleFirstInteraction, { passive: true });
+    window.addEventListener('touchstart', handleFirstInteraction, { passive: true });
+    window.addEventListener('scroll', handleFirstInteraction, { passive: true });
+    window.addEventListener('click', handleFirstInteraction, { passive: true });
 
-    // Mostrar brevemente un aviso al inicio
-    const tooltipTimer = setTimeout(() => {
-      setShowTooltip(true);
-      const hideTimer = setTimeout(() => setShowTooltip(false), 5000);
-      return () => clearTimeout(hideTimer);
-    }, 1200);
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
 
     return () => {
-      clearTimeout(tooltipTimer);
-      removeListeners();
-      audio.removeEventListener('canplay', handleCanPlay);
+      cleanup();
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
     };
@@ -85,8 +70,6 @@ export default function AudioPlayer() {
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
-
-    hasInteractedRef.current = true;
 
     if (isPlaying) {
       audio.pause();
@@ -100,88 +83,67 @@ export default function AudioPlayer() {
       <audio
         ref={audioRef}
         src={encodeURI(eventConfig.music.src)}
+        autoPlay
         loop
         preload="auto"
       />
 
-      {/* Botón flotante de reproducción en esquina inferior derecha */}
-      <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 flex items-center gap-2 select-none">
-        {/* Tooltip informativo inicial o en hover */}
-        <AnimatePresence>
-          {showTooltip && (
-            <motion.div
-              initial={{ opacity: 0, x: 10, scale: 0.95 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 10, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 border border-sage-300/70 shadow-md text-forest text-xs font-serif backdrop-blur-sm pointer-events-none"
-            >
-              <span className="w-2 h-2 rounded-full bg-sage-400 animate-pulse" />
-              <span>
-                {isPlaying ? 'Reproduciendo:' : 'Música:'}{' '}
-                <strong className="font-medium">{eventConfig.music.title}</strong>
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Botón interactivo principal */}
+      {/* Botón flotante pequeño: solo símbolo de audio y mute */}
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 select-none">
         <motion.button
           type="button"
           onClick={togglePlay}
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
-          aria-label={isPlaying ? 'Pausar música de fondo' : 'Reproducir música de fondo'}
-          className={`group relative flex items-center gap-2.5 h-11 px-3.5 sm:px-4 rounded-full border transition-all duration-300 cursor-pointer shadow-md backdrop-blur-md ${
+          title={isPlaying ? 'Silenciar música' : 'Activar música'}
+          aria-label={isPlaying ? 'Silenciar música' : 'Activar música'}
+          className={`relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border shadow-md backdrop-blur-md transition-all duration-300 cursor-pointer ${
             isPlaying
-              ? 'bg-forest text-ivory border-forest shadow-forest/20 hover:bg-forest/90'
-              : 'bg-ivory-50/95 text-forest border-sage-300/70 hover:bg-white hover:border-sage-400 shadow-sage-200/50'
+              ? 'bg-forest text-ivory border-forest/90 hover:bg-forest/90 hover:shadow-lg hover:shadow-forest/20'
+              : 'bg-ivory-50/90 text-sage-600 border-sage-300/70 hover:bg-white hover:text-forest hover:border-sage-400'
           }`}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
         >
-          {/* Ondas sonoras / Ecualizador animado cuando suena */}
           {isPlaying ? (
-            <div className="flex items-end gap-[3px] h-3.5 w-3.5 my-auto">
-              <span className="w-[2.5px] bg-ivory rounded-full h-full animate-[musicBar_0.8s_ease-in-out_infinite_alternate]" />
-              <span className="w-[2.5px] bg-ivory rounded-full h-2/3 animate-[musicBar_0.8s_ease-in-out_0.2s_infinite_alternate]" />
-              <span className="w-[2.5px] bg-ivory rounded-full h-4/5 animate-[musicBar_0.8s_ease-in-out_0.4s_infinite_alternate]" />
-            </div>
-          ) : (
-            /* Icono de Play elegante cuando está pausado */
+            /* Símbolo de Audio sonando */
             <svg
-              className="w-3.5 h-3.5 text-sage-600 transition-colors group-hover:text-forest fill-current"
+              className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-ivory fill-current"
               viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <path d="M8 5v14l11-7z" />
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" />
+            </svg>
+          ) : (
+            /* Símbolo de Mute */
+            <svg
+              className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-sage-500 hover:text-forest fill-current transition-colors"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <line x1="22" y1="9" x2="16" y2="15" fill="none" />
+              <line x1="16" y1="9" x2="22" y2="15" fill="none" />
             </svg>
           )}
 
-          {/* Texto de control */}
-          <span className="font-serif text-[11px] sm:text-xs tracking-[0.2em] uppercase font-medium">
-            {isPlaying ? 'Música' : 'Música'}
-          </span>
-
-          {/* Indicador sutil de pulso al sonar */}
+          {/* Sutil pulso cuando la música está reproduciéndose */}
           {isPlaying && (
-            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+            <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sage-300 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-sage-400" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-sage-400" />
             </span>
           )}
         </motion.button>
       </div>
-
-      <style jsx global>{`
-        @keyframes musicBar {
-          0% {
-            height: 25%;
-          }
-          100% {
-            height: 100%;
-          }
-        }
-      `}</style>
     </>
   );
 }

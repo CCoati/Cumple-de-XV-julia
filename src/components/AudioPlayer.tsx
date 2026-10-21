@@ -7,6 +7,7 @@ import { eventConfig } from '@/lib/event-config';
 export default function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const userMutedRef = useRef<boolean>(false);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -14,45 +15,62 @@ export default function AudioPlayer() {
 
     audio.volume = 0.45;
 
-    const playAudio = () => {
+    const gestureEvents = [
+      'touchstart',
+      'touchend',
+      'pointerdown',
+      'pointerup',
+      'click',
+      'mousedown',
+      'keydown',
+    ];
+
+    const removeInteractionListeners = () => {
+      gestureEvents.forEach((ev) => {
+        window.removeEventListener(ev, onUserGesture, { capture: true } as EventListenerOptions);
+        document.removeEventListener(ev, onUserGesture, { capture: true } as EventListenerOptions);
+      });
+    };
+
+    const startPlayback = () => {
+      if (userMutedRef.current || !audio) return;
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             setIsPlaying(true);
+            removeInteractionListeners();
           })
           .catch(() => {
-            // Autoplay bloqueado inicialmente por política del navegador
-            setIsPlaying(false);
+            // Autoplay bloqueado por el navegador; los listeners de gestos continuarán activos
           });
       }
     };
 
-    // 1. Intentar reproducir de inmediato al cargar la página
-    playAudio();
-
-    // 2. Respaldo para navegadores móviles con bloqueo de autoplay:
-    // Al primer contacto (scroll, tap o clic en cualquier parte), activar de inmediato
-    const handleFirstInteraction = () => {
-      if (audio.paused) {
-        audio.play()
-          .then(() => setIsPlaying(true))
-          .catch(() => {});
+    const onUserGesture = () => {
+      if (!userMutedRef.current && audio.paused) {
+        startPlayback();
       }
-      cleanup();
     };
 
-    const cleanup = () => {
-      window.removeEventListener('pointerdown', handleFirstInteraction);
-      window.removeEventListener('touchstart', handleFirstInteraction);
-      window.removeEventListener('scroll', handleFirstInteraction);
-      window.removeEventListener('click', handleFirstInteraction);
+    const addInteractionListeners = () => {
+      gestureEvents.forEach((ev) => {
+        window.addEventListener(ev, onUserGesture, { capture: true, passive: true });
+        document.addEventListener(ev, onUserGesture, { capture: true, passive: true });
+      });
     };
 
-    window.addEventListener('pointerdown', handleFirstInteraction, { passive: true });
-    window.addEventListener('touchstart', handleFirstInteraction, { passive: true });
-    window.addEventListener('scroll', handleFirstInteraction, { passive: true });
-    window.addEventListener('click', handleFirstInteraction, { passive: true });
+    // 1. Intentar reproducir automáticamente de inmediato
+    startPlayback();
+
+    // 2. Si el archivo aún no estaba cargado, reintentar al estar listo
+    const handleCanPlay = () => {
+      startPlayback();
+    };
+    audio.addEventListener('canplay', handleCanPlay, { once: true });
+
+    // 3. Activar listeners en fase de captura para que el primer tap o clic en cualquier parte inicie la música
+    addInteractionListeners();
 
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
@@ -61,7 +79,8 @@ export default function AudioPlayer() {
     audio.addEventListener('pause', handlePause);
 
     return () => {
-      cleanup();
+      removeInteractionListeners();
+      audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
     };
@@ -72,8 +91,10 @@ export default function AudioPlayer() {
     if (!audio) return;
 
     if (isPlaying) {
+      userMutedRef.current = true;
       audio.pause();
     } else {
+      userMutedRef.current = false;
       audio.play().catch((err) => console.log('Error al reproducir audio:', err));
     }
   };
@@ -82,9 +103,10 @@ export default function AudioPlayer() {
     <>
       <audio
         ref={audioRef}
-        src={encodeURI(eventConfig.music.src)}
+        src={eventConfig.music.src}
         autoPlay
         loop
+        playsInline
         preload="auto"
       />
 

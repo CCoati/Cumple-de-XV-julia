@@ -63,6 +63,6 @@ export const eventConfig = {
   music: {
     title: "Say You Won't Let Go",
     artist: 'James Arthur',
-    src: "/audio/James Arthur - Say You Won't Let Go.mp3",
+    src: '/audio/musica.mp3',
   },
 } as const;

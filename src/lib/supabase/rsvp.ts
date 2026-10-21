@@ -15,6 +15,7 @@ interface SupabaseConfirmationRow {
   guest_count: number;
   guest_names: string[] | null;
   message: string | null;
+  dietary_notes?: string | null;
   created_at: string;
   updated_at?: string;
 }
@@ -28,6 +29,7 @@ function mapRowToDocument(row: SupabaseConfirmationRow): RSVPDocument {
     attending: row.attending === 'yes' ? 'yes' : 'no',
     guestCount: Number(row.guest_count) || 0,
     guestNames: Array.isArray(row.guest_names) ? row.guest_names : [],
+    dietaryNotes: row.dietary_notes || '',
     message: row.message || '',
     createdAt: {
       toDate: () => createdDate,
@@ -85,6 +87,7 @@ export async function saveRSVPToSupabase(data: RSVPFormData): Promise<SaveRSVPRe
       attending: data.attending,
       guest_count: guestCount,
       guest_names: cleanedGuestNames,
+      dietary_notes: (data.dietaryNotes || '').trim().slice(0, 500) || null,
       message: (data.message || '').trim().slice(0, 500),
     };
 
@@ -219,6 +222,9 @@ export async function updateConfirmation(
     payload.guest_names = updatedData.guestNames
       .map((n) => (n || '').trim())
       .filter(Boolean);
+  }
+  if (updatedData.dietaryNotes !== undefined) {
+    payload.dietary_notes = updatedData.dietaryNotes.trim();
   }
   if (updatedData.message !== undefined) {
     payload.message = updatedData.message.trim();

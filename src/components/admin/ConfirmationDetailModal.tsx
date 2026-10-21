@@ -133,6 +133,24 @@ export default function ConfirmationDetailModal({
             </div>
           )}
 
+          {/* Preferencias alimentarias / Alergias */}
+          {isAttending && (
+            <div>
+              <p className="text-xs text-sage-600 uppercase tracking-wider mb-1">
+                Alimentación y Alergias
+              </p>
+              <div className="bg-[#FAF8F5] p-3 rounded border border-sage-200/70 text-forest text-sm">
+                {confirmation.dietaryNotes ? (
+                  <span className="font-medium text-amber-900 bg-amber-50 px-2 py-1 rounded border border-amber-200 inline-block">
+                    🥗 {confirmation.dietaryNotes}
+                  </span>
+                ) : (
+                  <span className="text-sage-500 italic">Sin preferencias o restricciones especificadas.</span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Mensaje u observaciones */}
           <div>
             <p className="text-xs text-sage-600 uppercase tracking-wider mb-1">
@@ -149,7 +167,7 @@ export default function ConfirmationDetailModal({
               <strong className="text-sage-700">Registrado el:</strong> {formatDate(confirmation.createdAt)}
             </p>
             <p className="font-mono text-[11px] text-sage-400">
-              ID Firestore: {confirmation.id}
+              ID: {confirmation.id}
             </p>
           </div>
         </div>

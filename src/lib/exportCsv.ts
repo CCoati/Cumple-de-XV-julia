@@ -59,6 +59,7 @@ export function exportConfirmationsToCsv(confirmations: RSVPDocument[]): void {
     'Cantidad de acompañantes',
     'Nombres de acompañantes',
     'Total de personas confirmadas',
+    'Alimentación / Alergias',
     'Mensaje',
     'Fecha de confirmación',
   ];
@@ -78,6 +79,7 @@ export function exportConfirmationsToCsv(confirmations: RSVPDocument[]): void {
       sanitizeCsvValue(isAttending ? item.guestCount || 0 : 0),
       sanitizeCsvValue(companionNames),
       sanitizeCsvValue(totalPeople),
+      sanitizeCsvValue(item.dietaryNotes || 'Ninguna'),
       sanitizeCsvValue(item.message || 'Sin mensaje'),
       sanitizeCsvValue(formatCsvDate(item.createdAt)),
     ].join(';');

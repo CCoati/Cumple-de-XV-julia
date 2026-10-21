@@ -594,6 +594,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                       <th className="py-3.5 px-3 font-medium">Estado</th>
                       <th className="py-3.5 px-3 font-medium">Acompañantes</th>
                       <th className="py-3.5 px-3 font-medium">Total Personas</th>
+                      <th className="py-3.5 px-3 font-medium">Alimentación</th>
                       <th className="py-3.5 px-3 font-medium">Fecha</th>
                       <th className="py-3.5 px-3 font-medium">Mensaje</th>
                       <th className="py-3.5 px-4 font-medium text-right">Acciones</th>
@@ -671,6 +672,20 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                               </span>
                             ) : (
                               <span className="text-stone-400">0</span>
+                            )}
+                          </td>
+
+                          {/* Alimentación / Alergias */}
+                          <td className="py-3.5 px-3 text-sage-700 max-w-[180px]">
+                            {item.dietaryNotes ? (
+                              <span
+                                className="inline-block text-[11px] text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 truncate max-w-full"
+                                title={item.dietaryNotes}
+                              >
+                                🥗 {item.dietaryNotes}
+                              </span>
+                            ) : (
+                              <span className="text-sage-400">—</span>
                             )}
                           </td>
 
@@ -785,6 +800,15 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                           <p className="text-forest mt-0.5">{isAttending ? item.guestCount || 0 : 0}</p>
                         </div>
                       </div>
+
+                      {item.dietaryNotes && (
+                        <div className="text-xs bg-amber-50/70 p-2 rounded border border-amber-200/80 text-amber-900">
+                          <span className="font-semibold text-[10px] uppercase block tracking-wider text-amber-800">
+                            🥗 Alimentación / Alergias:
+                          </span>
+                          <span>{item.dietaryNotes}</span>
+                        </div>
+                      )}
 
                       {item.message && (
                         <p className="text-xs text-sage-700 italic bg-[#FAF8F5] p-2 rounded border border-sage-200/40">

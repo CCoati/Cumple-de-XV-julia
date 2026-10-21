@@ -25,6 +25,7 @@ export default function ConfirmationEditModal({
     return names.slice(0, initialCount);
   });
   const [message, setMessage] = useState(confirmation?.message || '');
+  const [dietaryNotes, setDietaryNotes] = useState(confirmation?.dietaryNotes || '');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -74,6 +75,7 @@ export default function ConfirmationEditModal({
         attending,
         guestCount: finalGuestCount,
         guestNames: finalGuestNames,
+        dietaryNotes: attending === 'yes' ? dietaryNotes.trim() : '',
         message: message.trim(),
       });
       onClose();
@@ -206,6 +208,23 @@ export default function ConfirmationEditModal({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Preferencias de alimentación o alergias */}
+          {attending === 'yes' && (
+            <div>
+              <label className="block text-xs text-sage-600 uppercase tracking-wider mb-1 font-medium">
+                Preferencia de Alimentación o Alergias
+              </label>
+              <input
+                type="text"
+                maxLength={200}
+                placeholder="Ej: Celíaco, vegetariano, alergia a nueces..."
+                value={dietaryNotes}
+                onChange={(e) => setDietaryNotes(e.target.value)}
+                className={inputClasses}
+              />
             </div>
           )}
 

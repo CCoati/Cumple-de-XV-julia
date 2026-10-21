@@ -4,6 +4,7 @@ export interface RSVPFormData {
   attending: 'yes' | 'no';
   guestCount: number;
   guestNames: string[];
+  dietaryNotes?: string;
   message: string;
 }
 

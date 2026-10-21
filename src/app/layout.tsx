@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://cumplejuliaxv.netlify.app'),
   title: 'Mis 15 — Julia | 28 de noviembre de 2026',
   description:
-    'Estás invitado/a a celebrar los 15 años de Julia. 28 de noviembre de 2026. Confirmá tu asistencia.',
+    'Estás invitado/a a celebrar los 15 años de Julia. 28 de noviembre de 2026, 21:00 hs. Confirmá tu asistencia hasta el 10 de noviembre.',
   icons: {
     icon: [
       { url: '/icon.png', sizes: '512x512', type: 'image/png' },

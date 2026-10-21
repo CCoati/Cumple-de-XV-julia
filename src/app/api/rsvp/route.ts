@@ -102,6 +102,14 @@ export async function POST(request: NextRequest) {
             </td>
           </tr>
           <tr>
+            <td style="padding: 12px 0; border-bottom: 1px solid #e5e0d8; color: #7A8B6F; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; vertical-align: top;">
+              Alimentación
+            </td>
+            <td style="padding: 12px 0; border-bottom: 1px solid #e5e0d8; color: #3D4A35; font-size: 15px;">
+              ${body.dietaryNotes || 'Sin requerimientos especiales'}
+            </td>
+          </tr>
+          <tr>
             <td style="padding: 12px 0; color: #7A8B6F; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; vertical-align: top;">
               Mensaje
             </td>

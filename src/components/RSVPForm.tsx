@@ -13,6 +13,7 @@ const initialFormData: RSVPFormData = {
   attending: 'yes',
   guestCount: 0,
   guestNames: [],
+  dietaryNotes: '',
   message: '',
 };
 
@@ -91,6 +92,10 @@ export default function RSVPForm() {
       }
     }
 
+    if (formData.dietaryNotes && formData.dietaryNotes.length > 500) {
+      return 'Las preferencias de alimentación no pueden superar los 500 caracteres.';
+    }
+
     if (formData.message && formData.message.length > 500) {
       return 'El mensaje no puede superar los 500 caracteres.';
     }
@@ -156,6 +161,10 @@ export default function RSVPForm() {
             '¿Asiste?': formData.attending === 'yes' ? 'Sí, voy a estar' : 'No voy a poder',
             'Cantidad de acompañantes': formData.attending === 'yes' ? formData.guestCount : 0,
             'Nombres de acompañantes': guestListText,
+            'Preferencia de alimentación / Alergias':
+              formData.attending === 'yes'
+                ? formData.dietaryNotes?.trim() || 'Ninguna'
+                : 'No asiste',
             'Mensaje o Deseo': formData.message.trim() || 'Sin mensaje adicional',
           }),
         });
@@ -246,7 +255,7 @@ export default function RSVPForm() {
           >
             <div className="bg-ivory-50/70 border border-sage-300/40 rounded-sm p-8 sm:p-12 shadow-sm transition-all duration-300 hover:border-sage-400/60 hover:shadow-md">
               <p className="font-serif text-forest text-lg sm:text-xl mb-8 leading-relaxed max-w-md mx-auto">
-                Por favor, confirmá tu asistencia para organizar cada detalle de esta noche mágica.
+                Por favor, confirmá tu asistencia hasta el 10 de noviembre para organizar cada detalle de esta noche mágica.
               </p>
 
               <button
@@ -488,6 +497,31 @@ export default function RSVPForm() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+
+                  {/* Preferencias de alimentación o alergias */}
+                  {formData.attending === 'yes' && (
+                    <div>
+                      <label
+                        htmlFor="rsvp-dietary"
+                        className="block font-serif text-sage-600 text-xs tracking-[0.2em] uppercase mb-2"
+                      >
+                        Preferencia en la alimentación o alergia{' '}
+                        <span className="text-sage-400/60 text-[10px] lowercase">(opcional)</span>
+                      </label>
+                      <input
+                        id="rsvp-dietary"
+                        type="text"
+                        className={inputClasses}
+                        placeholder="Ej: Celíaco/a, vegetariano/a, intolerancia a la lactosa, alergia a nueces..."
+                        value={formData.dietaryNotes || ''}
+                        maxLength={200}
+                        onChange={(e) => updateField('dietaryNotes', e.target.value)}
+                      />
+                      <p className="font-serif text-sage-500 text-[11px] mt-1.5 italic">
+                        Contanos si vos o tus acompañantes tienen alguna necesidad o restricción alimentaria.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Message */}
                   <div>

@@ -8,11 +8,13 @@ export const eventConfig = {
   /** Nombre corto / apodo para la tipografía script */
   shortName: 'Juli',
   /** Fecha del evento en formato ISO */
-  date: '2026-11-28T00:00:00',
+  date: '2026-11-28T21:00:00',
   /** Fecha para mostrar en pantalla */
   displayDate: '28 · 11 · 2026',
   /** Hora del evento */
-  time: 'A confirmar',
+  time: '21:00 hs',
+  /** Fecha límite de confirmación */
+  rsvpDeadline: '10 de noviembre',
   /** Lugar del evento */
   venue: {
     name: 'Solar Dom Pedro',

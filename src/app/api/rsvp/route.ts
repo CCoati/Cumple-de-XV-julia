@@ -85,12 +85,14 @@ export async function POST(request: NextRequest) {
               ${body.attending === 'yes' ? '✅ Sí, va a asistir' : '❌ No va a poder asistir'}
             </td>
           </tr>
-          <tr>
+          ${
+            body.guestCount && body.guestCount > 0
+              ? `<tr>
             <td style="padding: 12px 0; border-bottom: 1px solid #e5e0d8; color: #7A8B6F; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; vertical-align: top;">
               Acompañantes
             </td>
             <td style="padding: 12px 0; border-bottom: 1px solid #e5e0d8; color: #3D4A35; font-size: 15px;">
-              ${body.guestCount || 0}
+              ${body.guestCount}
             </td>
           </tr>
           <tr>
@@ -100,7 +102,9 @@ export async function POST(request: NextRequest) {
             <td style="padding: 12px 0; border-bottom: 1px solid #e5e0d8; color: #3D4A35; font-size: 15px;">
               ${guestNamesFormatted}
             </td>
-          </tr>
+          </tr>`
+              : ''
+          }
           <tr>
             <td style="padding: 12px 0; border-bottom: 1px solid #e5e0d8; color: #7A8B6F; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; vertical-align: top;">
               Alimentación

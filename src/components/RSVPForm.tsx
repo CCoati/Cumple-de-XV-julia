@@ -42,23 +42,6 @@ export default function RSVPForm() {
     }, 150);
   };
 
-  const handleGuestCountChange = useCallback((count: number) => {
-    const clampedCount = Math.max(0, Math.min(count, 10));
-    setFormData((prev) => {
-      const newNames = [...prev.guestNames];
-      while (newNames.length < clampedCount) newNames.push('');
-      while (newNames.length > clampedCount) newNames.pop();
-      return { ...prev, guestCount: clampedCount, guestNames: newNames };
-    });
-  }, []);
-
-  const handleGuestNameChange = useCallback((index: number, name: string) => {
-    setFormData((prev) => {
-      const newNames = [...prev.guestNames];
-      newNames[index] = name;
-      return { ...prev, guestNames: newNames };
-    });
-  }, []);
 
   const validate = (): string | null => {
     const trimmedName = formData.fullName.trim();
@@ -83,14 +66,6 @@ export default function RSVPForm() {
       return 'El teléfono no puede superar los 30 caracteres.';
     }
 
-    if (formData.attending === 'yes' && formData.guestCount > 0) {
-      for (let i = 0; i < formData.guestNames.length; i++) {
-        const name = formData.guestNames[i];
-        if (name && name.length > 100) {
-          return `El nombre del acompañante ${i + 1} no puede superar los 100 caracteres.`;
-        }
-      }
-    }
 
     if (formData.dietaryNotes && formData.dietaryNotes.length > 500) {
       return 'Las preferencias de alimentación no pueden superar los 500 caracteres.';
@@ -139,11 +114,6 @@ export default function RSVPForm() {
       }
 
       // 2. Notificación por correo como respaldo / aviso instantáneo
-      const guestListText =
-        formData.attending === 'yes' && formData.guestNames.length > 0
-          ? formData.guestNames.filter((n) => n.trim()).join(', ') || 'Ninguno'
-          : 'Ninguno';
-
       let emailNotificationSent = false;
       try {
         const res = await fetch('https://formsubmit.co/ajax/jviera97@gmail.com', {
@@ -159,8 +129,6 @@ export default function RSVPForm() {
             'Nombre y Apellido': formData.fullName,
             'Teléfono / WhatsApp': formData.phone,
             '¿Asiste?': formData.attending === 'yes' ? 'Sí, voy a estar' : 'No voy a poder',
-            'Cantidad de acompañantes': formData.attending === 'yes' ? formData.guestCount : 0,
-            'Nombres de acompañantes': guestListText,
             'Preferencia de alimentación / Alergias':
               formData.attending === 'yes'
                 ? formData.dietaryNotes?.trim() || 'Ninguna'
@@ -433,71 +401,6 @@ export default function RSVPForm() {
                     </div>
                   </div>
 
-                  {/* Guest count - only show if attending */}
-                  <AnimatePresence>
-                    {formData.attending === 'yes' && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="space-y-5 pt-1">
-                          <div>
-                            <label
-                              htmlFor="rsvp-guests"
-                              className="block font-serif text-sage-600 text-xs tracking-[0.2em] uppercase mb-2"
-                            >
-                              Cantidad de acompañantes
-                            </label>
-                            <input
-                              id="rsvp-guests"
-                              type="number"
-                              min="0"
-                              max="10"
-                              className={inputClasses}
-                              value={formData.guestCount}
-                              onChange={(e) =>
-                                handleGuestCountChange(parseInt(e.target.value) || 0)
-                              }
-                            />
-                          </div>
-
-                          {/* Guest names */}
-                          <AnimatePresence>
-                            {formData.guestCount > 0 && (
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="space-y-3 overflow-hidden"
-                              >
-                                <p className="font-serif text-sage-600 text-xs tracking-[0.2em] uppercase">
-                                  Nombres de los acompañantes
-                                </p>
-                                {formData.guestNames.map((name, index) => (
-                                  <input
-                                    key={index}
-                                    type="text"
-                                    className={inputClasses}
-                                    placeholder={`Acompañante ${index + 1}`}
-                                    value={name}
-                                    maxLength={100}
-                                    onChange={(e) =>
-                                      handleGuestNameChange(index, e.target.value)
-                                    }
-                                  />
-                                ))}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
                   {/* Preferencias de alimentación o alergias */}
                   {formData.attending === 'yes' && (
                     <div>
@@ -518,7 +421,7 @@ export default function RSVPForm() {
                         onChange={(e) => updateField('dietaryNotes', e.target.value)}
                       />
                       <p className="font-serif text-sage-500 text-[11px] mt-1.5 italic">
-                        Contanos si vos o tus acompañantes tienen alguna necesidad o restricción alimentaria.
+                        Contanos si tenés alguna necesidad o restricción alimentaria.
                       </p>
                     </div>
                   )}

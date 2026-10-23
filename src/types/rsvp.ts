@@ -1,5 +1,6 @@
 export interface RSVPFormData {
   fullName: string;
+  cedula: string;
   phone: string;
   attending: 'yes' | 'no';
   guestCount: number;

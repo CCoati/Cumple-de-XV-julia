@@ -54,6 +54,7 @@ function formatCsvDate(raw: unknown): string {
 export function exportConfirmationsToCsv(confirmations: RSVPDocument[]): void {
   const headers = [
     'Nombre completo',
+    'Cédula de Identidad',
     'Teléfono',
     'Asistencia',
     'Cantidad de acompañantes',
@@ -74,6 +75,7 @@ export function exportConfirmationsToCsv(confirmations: RSVPDocument[]): void {
 
     return [
       sanitizeCsvValue(item.fullName),
+      sanitizeCsvValue(item.cedula || '—'),
       sanitizeCsvValue(item.phone),
       sanitizeCsvValue(isAttending ? 'Sí, asiste' : 'No asistirá'),
       sanitizeCsvValue(isAttending ? item.guestCount || 0 : 0),

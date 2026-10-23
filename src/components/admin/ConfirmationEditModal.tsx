@@ -16,6 +16,7 @@ export default function ConfirmationEditModal({
 }: EditModalProps) {
   const initialCount = Number(confirmation?.guestCount) || 0;
   const [fullName, setFullName] = useState(confirmation?.fullName || '');
+  const [cedula, setCedula] = useState(confirmation?.cedula || '');
   const [phone, setPhone] = useState(confirmation?.phone || '');
   const [attending, setAttending] = useState<'yes' | 'no'>(confirmation?.attending || 'yes');
   const [guestCount, setGuestCount] = useState(initialCount);
@@ -52,6 +53,10 @@ export default function ConfirmationEditModal({
       setErrorMessage('El nombre y apellido son obligatorios.');
       return;
     }
+    if (!cedula.trim()) {
+      setErrorMessage('La cédula de identidad es obligatoria.');
+      return;
+    }
     if (!phone.trim()) {
       setErrorMessage('El teléfono es obligatorio.');
       return;
@@ -71,6 +76,7 @@ export default function ConfirmationEditModal({
 
       await onSave(confirmation.id, {
         fullName: fullName.trim(),
+        cedula: cedula.trim(),
         phone: phone.trim(),
         attending,
         guestCount: finalGuestCount,
@@ -123,6 +129,21 @@ export default function ConfirmationEditModal({
               maxLength={100}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
+              className={inputClasses}
+            />
+          </div>
+
+          {/* Cédula de Identidad */}
+          <div>
+            <label className="block text-xs text-sage-600 uppercase tracking-wider mb-1 font-medium">
+              Cédula de Identidad
+            </label>
+            <input
+              type="text"
+              required
+              maxLength={30}
+              value={cedula}
+              onChange={(e) => setCedula(e.target.value)}
               className={inputClasses}
             />
           </div>

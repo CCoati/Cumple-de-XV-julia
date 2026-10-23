@@ -14,6 +14,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!body.cedula?.trim()) {
+      return NextResponse.json(
+        { success: false, message: 'La cédula de identidad es requerida.' },
+        { status: 400 }
+      );
+    }
+
     if (!body.phone?.trim()) {
       return NextResponse.json(
         { success: false, message: 'El número de teléfono es requerido.' },
@@ -67,6 +74,14 @@ export async function POST(request: NextRequest) {
             </td>
             <td style="padding: 12px 0; border-bottom: 1px solid #e5e0d8; color: #3D4A35; font-size: 15px; font-weight: bold;">
               ${body.fullName}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 12px 0; border-bottom: 1px solid #e5e0d8; color: #7A8B6F; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; vertical-align: top;">
+              Cédula de Identidad
+            </td>
+            <td style="padding: 12px 0; border-bottom: 1px solid #e5e0d8; color: #3D4A35; font-size: 15px; font-weight: bold;">
+              ${body.cedula}
             </td>
           </tr>
           <tr>

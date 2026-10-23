@@ -9,6 +9,7 @@ import { saveRSVPToSupabase, isSupabaseConfigured } from '@/lib/supabase';
 
 const initialFormData: RSVPFormData = {
   fullName: '',
+  cedula: '',
   phone: '',
   attending: 'yes',
   guestCount: 0,
@@ -64,6 +65,17 @@ export default function RSVPForm() {
     }
     if (trimmedPhone.length > 30) {
       return 'El teléfono no puede superar los 30 caracteres.';
+    }
+
+    const trimmedCedula = formData.cedula.trim();
+    if (!trimmedCedula) {
+      return 'Por favor, ingresá tu cédula de identidad.';
+    }
+    if (trimmedCedula.length < 4) {
+      return 'La cédula de identidad debe contener al menos 4 caracteres.';
+    }
+    if (trimmedCedula.length > 30) {
+      return 'La cédula de identidad no puede superar los 30 caracteres.';
     }
 
 
@@ -127,6 +139,7 @@ export default function RSVPForm() {
             _template: 'table',
             _captcha: 'false',
             'Nombre y Apellido': formData.fullName,
+            'Cédula de Identidad': formData.cedula.trim(),
             'Teléfono / WhatsApp': formData.phone,
             '¿Asiste?': formData.attending === 'yes' ? 'Sí, voy a estar' : 'No voy a poder',
             'Preferencia de alimentación / Alergias':
@@ -351,6 +364,26 @@ export default function RSVPForm() {
                       value={formData.fullName}
                       onChange={(e) => updateField('fullName', e.target.value)}
                       maxLength={100}
+                      required
+                    />
+                  </div>
+
+                  {/* Cédula de Identidad */}
+                  <div>
+                    <label
+                      htmlFor="rsvp-cedula"
+                      className="block font-serif text-sage-600 text-xs tracking-[0.2em] uppercase mb-2"
+                    >
+                      Cédula de identidad <span className="text-sage-400">*</span>
+                    </label>
+                    <input
+                      id="rsvp-cedula"
+                      type="text"
+                      className={inputClasses}
+                      placeholder="Ej: 1.234.567-8"
+                      value={formData.cedula}
+                      onChange={(e) => updateField('cedula', e.target.value)}
+                      maxLength={30}
                       required
                     />
                   </div>

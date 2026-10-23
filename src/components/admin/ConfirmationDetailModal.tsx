@@ -93,6 +93,14 @@ export default function ConfirmationDetailModal({
             </div>
           </div>
 
+          {/* Cédula de Identidad */}
+          <div>
+            <p className="text-xs text-sage-600 uppercase tracking-wider mb-1">Cédula de Identidad</p>
+            <span className="text-forest text-base font-medium">
+              {confirmation.cedula || 'No especificada'}
+            </span>
+          </div>
+
           {/* Teléfono y WhatsApp */}
           <div>
             <p className="text-xs text-sage-600 uppercase tracking-wider mb-1">Teléfono / Contacto</p>

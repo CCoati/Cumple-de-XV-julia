@@ -178,12 +178,13 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
       result = result.filter((item) => item.attending === statusFilter);
     }
 
-    // Búsqueda por nombre o teléfono
+    // Búsqueda por nombre, cédula o teléfono
     if (searchTerm.trim()) {
       const query = searchTerm.toLowerCase().trim();
       result = result.filter(
         (item) =>
           item.fullName.toLowerCase().includes(query) ||
+          (item.cedula && item.cedula.toLowerCase().includes(query)) ||
           item.phone.toLowerCase().includes(query) ||
           item.guestNames?.some((name) => name.toLowerCase().includes(query))
       );
@@ -478,7 +479,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
             <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="Buscar por nombre, teléfono o acompañante..."
+                placeholder="Buscar por nombre, cédula, teléfono o acompañante..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-[#FAF8F5] border border-sage-300 rounded px-3.5 py-2.5 pl-10 font-serif text-sm text-forest placeholder:text-sage-400 focus:outline-none focus:border-sage-500 focus:bg-white transition-all"
@@ -616,6 +617,11 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                             <div className="font-medium text-forest text-sm">
                               {item.fullName}
                             </div>
+                            {item.cedula && (
+                              <div className="text-[11px] text-sage-600 font-sans tracking-wide">
+                                CI: <span className="font-medium text-sage-800">{item.cedula}</span>
+                              </div>
+                            )}
                             <div className="flex items-center gap-2 mt-0.5 text-sage-600 text-xs font-sans">
                               <span>{item.phone}</span>
                               {cleanPhone && (
@@ -761,6 +767,11 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                           <h3 className="text-base font-medium text-forest">
                             {item.fullName}
                           </h3>
+                          {item.cedula && (
+                            <p className="text-xs text-sage-700 font-sans mt-0.5">
+                              CI: <span className="font-medium">{item.cedula}</span>
+                            </p>
+                          )}
                           <div className="flex items-center gap-2 text-xs text-sage-600 mt-0.5">
                             <span>{item.phone}</span>
                             {cleanPhone && (

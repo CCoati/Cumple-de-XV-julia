@@ -3,14 +3,20 @@
 CREATE TABLE IF NOT EXISTS public.confirmaciones (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   full_name TEXT NOT NULL,
+  cedula TEXT NOT NULL DEFAULT '',
   phone TEXT NOT NULL,
   attending TEXT NOT NULL DEFAULT 'yes',
   guest_count INTEGER NOT NULL DEFAULT 0,
   guest_names TEXT[] NOT NULL DEFAULT '{}',
   message TEXT DEFAULT '',
+  dietary_notes TEXT DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+-- Si la tabla ya fue creada previamente, añadir las columnas que falten:
+ALTER TABLE public.confirmaciones ADD COLUMN IF NOT EXISTS cedula TEXT DEFAULT '';
+ALTER TABLE public.confirmaciones ADD COLUMN IF NOT EXISTS dietary_notes TEXT DEFAULT '';
 
 -- Índices de búsqueda y orden
 CREATE INDEX IF NOT EXISTS idx_confirmaciones_created_at ON public.confirmaciones (created_at DESC);

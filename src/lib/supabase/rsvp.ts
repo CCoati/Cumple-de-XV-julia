@@ -10,6 +10,7 @@ export interface SaveRSVPResult {
 interface SupabaseConfirmationRow {
   id: string;
   full_name: string;
+  cedula?: string | null;
   phone: string;
   attending: string;
   guest_count: number;
@@ -25,6 +26,7 @@ function mapRowToDocument(row: SupabaseConfirmationRow): RSVPDocument {
   return {
     id: row.id,
     fullName: row.full_name || '',
+    cedula: row.cedula || '',
     phone: row.phone || '',
     attending: row.attending === 'yes' ? 'yes' : 'no',
     guestCount: Number(row.guest_count) || 0,
@@ -53,12 +55,20 @@ export async function saveRSVPToSupabase(data: RSVPFormData): Promise<SaveRSVPRe
 
   // Validaciones de seguridad y consistencia en el payload
   const trimmedName = data.fullName.trim();
+  const trimmedCedula = (data.cedula || '').trim();
   const trimmedPhone = data.phone.trim();
 
   if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 100) {
     return {
       success: false,
       error: 'El nombre debe tener entre 2 y 100 caracteres.',
+    };
+  }
+
+  if (!trimmedCedula || trimmedCedula.length < 4 || trimmedCedula.length > 30) {
+    return {
+      success: false,
+      error: 'La cédula de identidad debe tener entre 4 y 30 caracteres.',
     };
   }
 
@@ -81,8 +91,9 @@ export async function saveRSVPToSupabase(data: RSVPFormData): Promise<SaveRSVPRe
       }
     }
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       full_name: trimmedName,
+      cedula: trimmedCedula,
       phone: trimmedPhone,
       attending: data.attending,
       guest_count: guestCount,
@@ -91,9 +102,21 @@ export async function saveRSVPToSupabase(data: RSVPFormData): Promise<SaveRSVPRe
       message: (data.message || '').trim().slice(0, 500),
     };
 
-    const { error } = await supabase
+    let { error } = await supabase
       .from('confirmaciones')
       .insert(payload);
+
+    // Fallback si la columna 'cedula' aún no existe en Supabase (preserva en message para no perder el dato)
+    if (error && (error.message?.includes('cedula') || error.code === 'PGRST204')) {
+      console.warn('Columna cedula no detectada en Supabase, reintentando guardado de respaldo...');
+      const fallbackPayload: Record<string, unknown> = {
+        ...payload,
+        message: payload.message ? `[C.I.: ${trimmedCedula}] ${payload.message}` : `[C.I.: ${trimmedCedula}]`,
+      };
+      delete fallbackPayload.cedula;
+      const retry = await supabase.from('confirmaciones').insert(fallbackPayload);
+      error = retry.error;
+    }
 
     if (error) {
       console.error('Error insertando en Supabase:', error);
@@ -205,6 +228,9 @@ export async function updateConfirmation(
   if (updatedData.fullName !== undefined) {
     payload.full_name = updatedData.fullName.trim();
   }
+  if (updatedData.cedula !== undefined) {
+    payload.cedula = updatedData.cedula.trim();
+  }
   if (updatedData.phone !== undefined) {
     payload.phone = updatedData.phone.trim();
   }
@@ -230,10 +256,19 @@ export async function updateConfirmation(
     payload.message = updatedData.message.trim();
   }
 
-  const { error } = await supabase
+  let { error } = await supabase
     .from('confirmaciones')
     .update(payload)
     .eq('id', id);
+
+  if (error && (error.message?.includes('cedula') || error.code === 'PGRST204')) {
+    delete payload.cedula;
+    const retry = await supabase
+      .from('confirmaciones')
+      .update(payload)
+      .eq('id', id);
+    error = retry.error;
+  }
 
   if (error) {
     console.error('Error actualizando confirmación:', error);

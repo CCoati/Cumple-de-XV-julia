@@ -68,64 +68,152 @@ async function generateAllAssetsWithAuthenticBotanicals() {
   fs.writeFileSync(path.join(rootDir, 'public', 'favicon.ico'), icoBuffer);
   fs.writeFileSync(path.join(rootDir, 'src', 'app', 'favicon.ico'), icoBuffer);
 
-  // 2. Generate Open Graph 1200x630 (WhatsApp & Social Preview)
-  const ogBase = await sharp({
-    create: {
-      width: 1200,
-      height: 630,
-      channels: 4,
-      background: '#FAF8F5',
-    },
-  }).png().toBuffer();
+  // 2. Generate Open Graph 1200x630 (Instagram, WhatsApp & Social Preview)
+  const width = 1200;
+  const height = 630;
+
+  const svgBackground = `
+    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Warm luxurious linen paper gradient -->
+        <radialGradient id="paperBg" cx="50%" cy="48%" r="68%" fx="50%" fy="48%">
+          <stop offset="0%" stop-color="#FCFAF7" />
+          <stop offset="65%" stop-color="#FAF6F0" />
+          <stop offset="100%" stop-color="#EFE9DE" />
+        </radialGradient>
+      </defs>
+
+      <!-- Background with warm linen fill -->
+      <rect width="${width}" height="${height}" fill="url(#paperBg)" />
+
+      <!-- Outer Scalloped Luxury Frame -->
+      <path d="
+        M 76 34
+        L 1124 34
+        A 34 34 0 0 1 1158 68
+        L 1158 562
+        A 34 34 0 0 1 1124 596
+        L 76 596
+        A 34 34 0 0 1 42 562
+        L 42 68
+        A 34 34 0 0 1 76 34
+        Z
+      " stroke="#8B9D7D" stroke-width="2.2" fill="none" opacity="0.88" />
+
+      <!-- Inner Scalloped Frame with 10px inset -->
+      <path d="
+        M 84 44
+        L 1116 44
+        A 30 30 0 0 1 1146 74
+        L 1146 556
+        A 30 30 0 0 1 1116 586
+        L 84 586
+        A 30 30 0 0 1 54 556
+        L 54 74
+        A 30 30 0 0 1 84 46
+        Z
+      " stroke="#A3B18A" stroke-width="1.2" fill="none" opacity="0.65" />
+
+      <!-- Delicate corner flourishes / 4-point stars -->
+      <!-- Top Right Stars -->
+      <g transform="translate(1072, 68) scale(0.38)" fill="#7A8B6F" opacity="0.75">
+        <path d="M50 0 Q50 50, 100 50 Q50 50, 50 100 Q50 50, 0 50 Q50 50, 50 0 Z" />
+      </g>
+      <g transform="translate(1106, 98) scale(0.24)" fill="#8B9D7D" opacity="0.6">
+        <path d="M50 0 Q50 50, 100 50 Q50 50, 50 100 Q50 50, 0 50 Q50 50, 50 0 Z" />
+      </g>
+
+      <!-- Bottom Left Stars -->
+      <g transform="translate(92, 526) scale(0.38)" fill="#7A8B6F" opacity="0.75">
+        <path d="M50 0 Q50 50, 100 50 Q50 50, 50 100 Q50 50, 0 50 Q50 50, 50 0 Z" />
+      </g>
+      <g transform="translate(126, 554) scale(0.24)" fill="#8B9D7D" opacity="0.6">
+        <path d="M50 0 Q50 50, 100 50 Q50 50, 50 100 Q50 50, 0 50 Q50 50, 50 0 Z" />
+      </g>
+
+      <!-- Header: MIS QUINCE with proper word spacing -->
+      <text x="600" y="98"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="22"
+        fill="#556B48"
+        text-anchor="middle"
+        font-weight="bold"
+        opacity="0.95">
+        <tspan letter-spacing="10">MIS</tspan>
+        <tspan dx="20" letter-spacing="10">QUINCE</tspan>
+      </text>
+
+      <!-- Bottom Divider line with Heart (under centerpiece) -->
+      <line x1="435" y1="432" x2="575" y2="432" stroke="#CBDABB" stroke-width="1.2" opacity="0.85" />
+      <text x="600" y="436" font-size="13" fill="#7A8B6F" text-anchor="middle" opacity="0.9">♥</text>
+      <line x1="625" y1="432" x2="765" y2="432" stroke="#CBDABB" stroke-width="1.2" opacity="0.85" />
+
+      <!-- Date: 28 DE NOVIEMBRE DE 2026 -->
+      <text x="600" y="476"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="26"
+        letter-spacing="9"
+        fill="#33422E"
+        text-anchor="middle"
+        font-weight="bold">28 DE NOVIEMBRE DE 2026</text>
+
+      <!-- Little Heart separator -->
+      <text x="600" y="504" font-size="11" fill="#8B9D7D" text-anchor="middle" opacity="0.85">♥</text>
+
+      <!-- Location / Time details -->
+      <text x="600" y="530"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="16"
+        letter-spacing="5"
+        fill="#586C4E"
+        text-anchor="middle"
+        font-weight="600">SOLAR DOM PEDRO · 21:00 HS</text>
+
+      <!-- Bottom invitation quote -->
+      <text x="600" y="558"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="14.5"
+        font-style="italic"
+        letter-spacing="2.5"
+        fill="#7A8B6F"
+        text-anchor="middle">Los momentos más lindos son los que compartimos</text>
+    </svg>
+  `;
 
   const tlBranch = await sharp(path.join(botanicalsDir, 'branch-top-left-clean.png'))
-    .resize(230, null)
+    .resize(345, null)
     .toBuffer();
 
   const brBranch = await sharp(path.join(botanicalsDir, 'branch-bottom-right-clean.png'))
-    .resize(230, null)
+    .resize(350, null)
     .toBuffer();
 
   const ogCenterpiece = await sharp(path.join(botanicalsDir, 'centerpiece-xv-juli.png'))
-    .resize(460, null)
+    .resize(470, null)
     .toBuffer();
 
-  const ogImage = await sharp(ogBase)
+  const ogImage = await sharp(Buffer.from(svgBackground))
     .composite([
-      // Scalloped luxury border
-      {
-        input: Buffer.from(`
-          <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 60 25 L 1140 25 A 30 30 0 0 1 1170 55 L 1170 575 A 30 30 0 0 1 1140 605 L 60 605 A 30 30 0 0 1 30 575 L 30 55 A 30 30 0 0 1 60 25 Z" stroke="#8B9D7D" stroke-width="2" fill="none" opacity="0.85" />
-            <path d="M 68 33 L 1132 33 A 28 28 0 0 1 1160 61 L 1160 569 A 28 28 0 0 1 1132 597 L 68 597 A 28 28 0 0 1 40 569 L 40 61 A 28 28 0 0 1 68 33 Z" stroke="#A3B18A" stroke-width="1.2" fill="none" opacity="0.6" />
-            <text x="600" y="90" font-family="Georgia, serif" font-size="30" letter-spacing="12" fill="#7A8B6F" text-anchor="middle" font-weight="bold">SAVE THE DATE</text>
-            <text x="600" y="475" font-family="Georgia, serif" font-size="24" letter-spacing="3" font-style="italic" fill="#8B9D7D" text-anchor="middle">Te invito a celebrar juntos esta noche inolvidable</text>
-            <text x="600" y="535" font-family="Georgia, serif" font-size="30" letter-spacing="8" fill="#7A8B6F" text-anchor="middle" font-weight="bold">28 · 11 · 2026</text>
-          </svg>
-        `),
-        top: 0,
-        left: 0,
-      },
-      // Top left watercolor branch
+      // Top-left foliage
       {
         input: tlBranch,
-        top: 35,
-        left: 45,
+        top: 25,
+        left: 40,
       },
-      // Bottom right watercolor branch
+      // Bottom-right foliage
       {
         input: brBranch,
-        top: 200,
-        left: 920,
+        top: 195,
+        left: 840,
       },
       // Authentic XV Juli centerpiece
       {
         input: ogCenterpiece,
-        top: 105,
-        left: 370,
+        top: 114,
+        left: 365,
       },
     ])
-    .png({ quality: 95 })
+    .png({ quality: 98 })
     .toBuffer();
 
   fs.writeFileSync(path.join(rootDir, 'public', 'og-image.png'), ogImage);

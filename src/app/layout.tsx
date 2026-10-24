@@ -40,15 +40,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Mis 15 — Julia',
     description:
-      'Estás invitado/a a celebrar los 15 años de Julia. 28 de noviembre de 2026.',
+      'Estás invitado/a a celebrar los 15 años de Julia. 28 de noviembre de 2026. ¡Confirmá tu asistencia!',
     url: 'https://cumplejuliaxv.netlify.app',
     siteName: 'Mis 15 — Julia',
     images: [
       {
-        url: '/og-image.png',
+        url: 'https://cumplejuliaxv.netlify.app/og-image.png?v=2',
+        secureUrl: 'https://cumplejuliaxv.netlify.app/og-image.png?v=2',
         width: 1200,
         height: 630,
-        alt: 'Mis 15 — Julia | 28 de noviembre de 2026',
+        type: 'image/png',
+        alt: 'Tarjeta de Invitación — Mis 15 Julia | 28 de noviembre de 2026',
       },
     ],
     type: 'website',
@@ -58,7 +60,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Mis 15 — Julia',
     description: 'Estás invitado/a a celebrar los 15 años de Julia. 28 de noviembre de 2026.',
-    images: ['/og-image.png'],
+    images: ['https://cumplejuliaxv.netlify.app/og-image.png?v=2'],
   },
 };
 
